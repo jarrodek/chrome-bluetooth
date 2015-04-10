@@ -33,7 +33,7 @@ basic information about devices, only the entry itself is required:
     
 Example:
     
-    <chrome-app-bluetooth 
+    <chrome-bluetooth 
         id="bluetooth"
         on-device-added="{{onDeviceAdded}}"
         on-device-changed="{{onDeviceChanged}}"
@@ -42,4 +42,4 @@ Example:
         on-error="{{onError}}"
         on-device="{{onDevice}}"
         on-discovery="{{onDiscoveryStateChanged}}"
-        ></chrome-app-bluetooth>
+        ></chrome-bluetooth>
