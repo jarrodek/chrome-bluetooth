@@ -1,0 +1,39 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+
+<!--
+For Chrome Apps that use Bluetooth, add the bluetooth entry to the manifest
+and specify, if appropriate, the UUIDs of profiles, protocols or services
+you wish to implement along with whether you wish to implement these with
+the socket and/or Low Energy APIs.
+
+For example for a socket implementation:
+
+...
+"bluetooth": {
+  "uuids": [ "1105", "1106" ],
+  "socket": true
+}
+...
+
+And for a Low Energy implementation:
+
+...
+"bluetooth": {
+  "uuids": [ "180D", "1809", "180F" ],
+  "low_energy": true
+}
+...
+
+
+To only access adapter state, discover nearby devices, and obtain
+basic information about devices, only the entry itself is required:
+
+"bluetooth": { }
+
+-->
+
+<polymer-element name="chrome-bluetooth" attributes="device">
+  <template>
+  </template>
+  <script src="chrome-bluetooth.js"></script>
+</polymer-element>
