@@ -1,0 +1,15 @@
+{
+  "name": "chrome-app-bluetooth",
+  "homepage": "https://github.com/jarrodek/chrome-bluetooth",
+  "keywords": [
+    "webcomponents", "polymer", "chrome-apps", "chrome"
+  ],
+  "private": true,
+  "dependencies": {
+    "polymer": "Polymer/polymer#master"
+  },
+  "ignore": [
+    "externs/**",
+    ".gitignore"
+  ]
+}
