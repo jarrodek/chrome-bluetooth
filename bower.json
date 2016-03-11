@@ -1,6 +1,6 @@
 {
   "name": "chrome-bluetooth",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "license": "LICENSE.txt",
   "description": "A Chrom bluetooth API in a web component.",
   "homepage": "https://github.com/jarrodek/chrome-bluetooth",

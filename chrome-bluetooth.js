@@ -1,5 +1,7 @@
 'use strict';
 
+/* global chrome, window */
+
 /**
  * Types:
  *
@@ -76,7 +78,7 @@ Polymer({
    */
   properties: {
     /**
-     * Address of device to get.
+     * Address of the device to get.
      *
      * @type String
      */
@@ -85,6 +87,30 @@ Polymer({
      * A handler to currently connected device.
      */
     currentDevice: {
+      type: Object,
+      readOnly: true,
+      notify: true
+    },
+    /**
+     * A map of discovered devices.
+     * Keys are dicovered device address and the value is device name.
+     */
+    deviceNames: {
+      type: Map,
+      readOnly: true,
+      notify: true,
+      value: new Map()
+    },
+    /**
+     * State of the Bluetooth adapter.
+     * The keys are:
+     * - {String} address The address of the adapter, in the format 'XX:XX:XX:XX:XX:XX'.
+     * - {String} name The human-readable name of the adapter.
+     * - {Boolean} powered Indicates whether or not the adapter has power.
+     * - {Boolean} available Indicates whether or not the adapter is available (i.e. enabled).
+     * - {Boolean} discovering Indicates whether or not the adapter is currently discovering.
+     */
+    adapterState: {
       type: Object,
       readOnly: true,
       notify: true
@@ -120,15 +146,34 @@ Polymer({
       value: function() {
         return this._onAdapterStateChanged.bind(this);
       }
+    },
+    /**
+     * True when the element is detecting adapter state
+     */
+    detectingState: {
+      type: Boolean,
+      readOnly: true,
+      value: true,
+    },
+    /**
+     * A timeout in miliseconds after the Bluetooth will exit discovery mode 
+     * after entering into it.
+     * 
+     */
+    discoveryTimeout: {
+      type: Number,
+      value: 30000
     }
   },
 
   ready: function() {
     this._addListeners();
+    this.detectAdapterState();
   },
 
   detached: function() {
     this._removeListeners();
+    this.devices();
   },
 
   _addListeners: function() {
@@ -144,23 +189,62 @@ Polymer({
     chrome.bluetooth.onDeviceRemoved.removeListener(this._onDeviceRemovedHandler);
     chrome.bluetooth.onAdapterStateChanged.removeListener(this._onAdapterStateChangedHandler);
   },
+  /**
+   * Detects Bluetooth adapter state.
+   * Result will be saved in `adapterState` property.
+   * When ready the `state-changed` event will be fired.
+   * 
+   * @return {Promise} Fulfilled promise will return current state.
+   */
+  detectAdapterState: function() {
+    return new Promise(function(resolve) {
+      this._setDetectingState(true);
+      chrome.bluetooth.getAdapterState((state) => {
+        this._setDetectingState(false);
+        this._setAdapterState(state);
+        this.fire('state-changed', state);
+        resolve(state);
+      });
+    });
+  },
 
   _onDeviceAdded: function(device) {
+    this._updateDeviceName(device);
     this.fire('device-added', device);
   },
 
   _onDeviceChanged: function(device) {
+    this._updateDeviceName(device);
     this.fire('device-changed', device);
   },
 
   _onDeviceRemoved: function(device) {
+    this._removeDeviceName(device);
     this.fire('device-removed', device);
   },
 
   _onAdapterStateChanged: function(state) {
     this.fire('state-changed', state);
   },
-
+  /**
+   * Updates dicovered devices list.
+   */
+  _updateDeviceName: function(device) {
+    var names = this.deviceNames;
+    names.set(device.address, device.name);
+    this._setDeviceNames(names);
+  },
+  /**
+   * Remove device name from the list of the devices names.
+   */
+  _removeDeviceName: function(device) {
+    var names = this.deviceNames;
+    if (names.has(device.address)) {
+      names.delete(device.address);
+      this._setDeviceNames(names);
+    }
+  },
+  
   deviceChanged: function() {
     this._setCurrentDevice(null);
 
@@ -213,6 +297,9 @@ Polymer({
           reject(chrome.runtime.lastError);
           return;
         }
+        for (var i = 0, len = deviceInfos.length; i < len; i++) {
+          this._updateDeviceName(deviceInfos[i]);
+        }
         resolve(deviceInfos);
       });
     });
@@ -240,6 +327,12 @@ Polymer({
       this.fire('discovery', {
         'mode': 'started'
       });
+      if (!this.discoveryTimeout) {
+        return;
+      }
+      window.setTimeout(() => {
+        chrome.bluetooth.stopDiscovery(function() {});
+      }, this.discoveryTimeout);
     });
   },
 
