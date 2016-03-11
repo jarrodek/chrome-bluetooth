@@ -1,0 +1,18 @@
+<!--
+Use `chrome-bluetooth-socket` element to create a socket connection to a
+Bluetooth device.
+
+When you connect to a socket you can send message to a device and 
+receive data from it.
+
+### Example
+```
+<chrome-bluetooth-socket id="socket"
+  uuid="0b87367c-f188-47cd-bc20-a5f4f70973c6"
+  address="[[socketAddress]]"
+  on-connected="_onConnected"
+  on-message="_onMessage"
+  last-message="[[lastSocketMessage]]"></chrome-bluetooth-socket>
+```
+-->
+<script src="chrome-bluetooth-socket.js"></script>
