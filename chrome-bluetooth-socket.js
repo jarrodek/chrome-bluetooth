@@ -125,6 +125,9 @@ Polymer({
    * callback is invoked.
    */
   disconnect: () => {
+    if (!this.socketId) {
+      return;
+    }
     chrome.bluetoothSocket.disconnect(this.socketId, () => {
       chrome.bluetoothSocket.close(this.socketId, () => {
         this._setSocketId(undefined);
@@ -158,6 +161,7 @@ Polymer({
   },
   
   _removeListeners: function() {
+    this.disconnect();
     chrome.bluetoothSocket.onRecieve.removeListener(this._onMessageHandler);
     chrome.bluetoothSocket.onReceiveError.removeListener(this._onMessageErrorHandler);
   },
@@ -178,11 +182,15 @@ Polymer({
    * Called when the connection error ocurred.
    */
   _onMessageError: function(info) {
+    if (info.socketId !== this.socketId) {
+      return;
+    }
     console.log('_onMessageError', info);
     var message = info.errorMessage;
     this._setLastError(message);
     this.fire('error', {
       message: message
     });
+    chrome.bluetoothSocket.setPaused(this.socketId, false, () => {});
   }
 });
