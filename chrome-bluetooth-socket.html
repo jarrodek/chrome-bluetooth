@@ -15,4 +15,14 @@ receive data from it.
   last-message="[[lastSocketMessage]]"></chrome-bluetooth-socket>
 ```
 -->
-<script src="chrome-bluetooth-socket.js"></script>
+<link rel="import" href="chrome-bluetooth-socket-behavior.html">
+<dom-module id="chrome-bluetooth-socket">
+  <template>
+    <style>
+      :host {
+        display: none;
+      }
+    </style>
+  </template>
+  <script src="chrome-bluetooth-socket.js"></script>
+</dom-module>

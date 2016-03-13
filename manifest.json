@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+  "name": "Chrome Bluetooth demo",
+  "description": "A demo for bluetooth webcomponents.",
+  "version": "0.0.1",
+  "minimum_chrome_version": "39",
+  "permissions": [
+  ],
+  "bluetooth": { 
+    "uuids": ["1506"],
+    "socket": true
+  },
+  "app": {
+    "background": {
+      "scripts": ["demo/background.js"]
+    }
+  }
+}

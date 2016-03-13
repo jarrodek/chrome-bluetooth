@@ -1,29 +1,13 @@
 'use strict';
 
-/* global chrome, ArrayBuffer, console */
+/* global chrome, ArrayBuffer, console, ChromeBehaviors */
 Polymer({
-  /**
-   * Fired when an error occurred.
-   * 
-   * @event error
-   * @param {String} message An error message with explanation.
-   */
   /**
    * Fired when the service has been created.
    * 
    * @event created
    */
-  /**
-   * Fired when the connection has been closed and resources released.
-   * 
-   * @event disconnected
-   */
-  /**
-   * Fired when message has been received.
-   * 
-   * @event message
-   * @param {ArrayBuffer} buffer Received message.
-   */
+  
   /**
    * Fired when the message has been sent to a socket.
    * 
@@ -38,16 +22,10 @@ Polymer({
    * identify the receiver of messages sent to clients.
    */
   is: 'chrome-bluetooth-service',
-  
+  behaviors: [
+    ChromeBehaviors.BluetoothSocketBehavior
+  ],
   properties: {
-    /**
-     * The UUID of the service to publish.
-     * It will throw an error if the uuid is not set before calling `publish()` 
-     * function.
-     */
-    uuid: {
-      type: String
-    },
     /**
      * Type of the service to publish.
      */
@@ -56,49 +34,12 @@ Polymer({
       value: 'RFCOMM'
     },
     /**
-     * Created server socket id.
-     */
-    socketId: {
-      type: Number,
-      readOnly: true
-    },
-    /**
-     * Last received message.
-     */
-    lastMessage: {
-      type: ArrayBuffer,
-      readOnly: true,
-      notify: true
-    },
-    /**
-     * Last error message received from the socket.
-     */
-    lastError: {
-      type: String,
-      readOnly: true
-    },
-    /**
-     * Clients connected to a service.
+     * Clients connected to the service.
      */
     clients: {
       type: Array,
-      readOnly: true
-    },
-    /**
-     * A handler to be called when socket message has been read.
-     */
-    _onMessageHandler: {
-      value: function() {
-        return this._onMessage.bind(this);
-      }
-    },
-    /**
-     * A handler to be called when socket message has been read.
-     */
-    _onMessageErrorHandler: {
-      value: function() {
-        return this._onMessageError.bind(this);
-      }
+      readOnly: true,
+      value: []
     },
     /**
      * A handler to be called when connection from the remote device 
@@ -115,13 +56,7 @@ Polymer({
       }
     }
   },
-  attached: function() {
-    this._attachListeners();
-  },
   
-  detached: function() {
-    this._removeListeners();
-  },
   /**
    * Publish the service.
    * This function can be called only once. Next calls will silently exit.
@@ -159,24 +94,7 @@ Polymer({
     });
   },
   /**
-   * Disconnects and destroys the socket. Each socket created should be closed 
-   * after use. The socket id is no longer valid as soon at the function is 
-   * called. However, the socket is guaranteed to be closed only when the 
-   * callback is invoked.
-   */
-  disconnect: () => {
-    if (!this.socketId) {
-      return;
-    }
-    chrome.bluetoothSocket.disconnect(this.socketId, () => {
-      chrome.bluetoothSocket.close(this.socketId, () => {
-        this._setSocketId(undefined);
-        this.fire('disconnected');
-      });
-    });
-  },
-  /**
-   * Sends a message to a socket.
+   * Sends a message to a client.
    * 
    * @param {Number} client A client to send message to.
    * @param {ArrayBuffer} buffer A message to send.
@@ -198,7 +116,7 @@ Polymer({
   },
   
   _attachListeners: function() {
-    chrome.bluetoothSocket.onRecieve.addListener(this._onMessageHandler);
+    chrome.bluetoothSocket.onReceive.addListener(this._onMessageHandler);
     chrome.bluetoothSocket.onReceiveError.addListener(this._onMessageErrorHandler);
     chrome.bluetoothSocket.onAccept.addListener(this._onAcceptHandler);
     chrome.bluetoothSocket.onAcceptError.addListener(this._onAcceptErrorHandler);
@@ -206,38 +124,30 @@ Polymer({
   
   _removeListeners: function() {
     this.disconnect();
-    chrome.bluetoothSocket.onRecieve.removeListener(this._onMessageHandler);
+    chrome.bluetoothSocket.onReceive.removeListener(this._onMessageHandler);
     chrome.bluetoothSocket.onReceiveError.removeListener(this._onMessageErrorHandler);
     chrome.bluetoothSocket.onAccept.removeListener(this._onAcceptHandler);
     chrome.bluetoothSocket.onAcceptError.removeListener(this._onAcceptErrorHandler);
   },
-  /**
-   * Called when the message has been received
-   * TODO: is info.socketId a this.socketId or clients[].socketId? 
-   */
-  _onMessage: function(info) {
-    var clientIndex = this._clientIndexOf(info.socketId);
+  
+  _isAllowedSocket: (socketId) => {
+    var clientIndex = this._clientIndexOf(socketId);
     if (clientIndex === -1) {
-      return;
+      return false;
     }
-    var buffer = info.data;
-    this._setLastMessage(buffer);
-    this.fire('message', {
-      buffer: buffer,
-      clientId: info.socketId
-    });
+    return true;
   },
   /**
    * Called when the connection error ocurred.
    */
   _onMessageError: function(info) {
-    var clientIndex = this._clientIndexOf(info.socketId);
-    if (clientIndex === -1) {
+    if (!this._isAllowedSocket(info.socketId)) {
       return;
     }
     if (info.error) {
       switch (info.error) {
         case 'disconnected':
+          let clientIndex = this._clientIndexOf(info.socketId);
           this.clients.splice(clientIndex, 1);
           this.fire('client-disconnected', {
             clientId: info.clientSocketId

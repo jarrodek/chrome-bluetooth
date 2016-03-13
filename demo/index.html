@@ -1,0 +1,77 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<html>
+
+<head>
+  <title>chrome-storage</title>
+  <script src="head.js"></script>
+  <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../bower_components/paper-styles/paper-styles.html">
+  <link rel="import" href="../bower_components/paper-styles/demo-pages.html">
+  <link rel="import" href="../bower_components/paper-button/paper-button.html">
+  <link rel="import" href="../bower_components/paper-input/paper-input-container.html">
+  <link rel="import" href="../chrome-bluetooth.html">
+  <link rel="import" href="../chrome-bluetooth-socket.html">
+  <link rel="import" href="../chrome-bluetooth-service.html">
+  <style is="custom-style">
+    html,
+    body {
+      overflow: auto;
+    }
+  </style>
+  </head>
+
+  <body>
+    <template is="dom-bind">
+      <div class="vertical-section vertical-section-container centered">
+        <div hidden$="[[adapterState.available]]">
+          <p>The bluetooth adapter is not available</p>
+        </div>
+        <div hidden$="[[!adapterState.available]]">
+          <template is="dom-if" if="[[isService]]">
+            <template is="dom-if" if="[[!serviceCreated]]">
+              <paper-button raised on-tap="_runService">Run Service</paper-button>
+            </template>
+            <template is="dom-if" if="[[serviceCreated]]">
+              <p>Service is up and running. Now on second app window run a client.</p>
+            </template>
+          </template>
+          <template is="dom-if" if="[[isClient]]">
+            <div hidden="[[!searchingDevices]]">
+              <p>Searching for devices</p>
+            </div>
+            <p>Devices found ([[devicesAvailable.length]]):</p>
+            <template is="dom-repeat" items="{{devicesAvailable}}">
+              <p>[[_getDeviceName(item)]]</p>
+            </template>
+            <div hidden="[[searchingDevices]]">
+              <paper-button raised on-tap="_searchBluetoothDevices">Search for devices</paper-button>
+            </div>
+          </template>
+          <template is="dom-if" if="[[noRole]]">
+            <p>Choose is this app is a client or service app</p>
+            <div>
+              <paper-button raised on-tap="_setService">Service</paper-button>
+              <paper-button raised on-tap="_setClient">Client</paper-button>
+            </div>
+          </template>
+        </div>
+      </div>
+      <div class="vertical-section vertical-section-container centered">
+        <paper-button raised on-tap="_openWindow">Open another window</paper-button>
+      </div>
+      <chrome-bluetooth devices="{{devicesAvailable}}" discoverying="{{searchingDevices}}" adapter-state="{{adapterState}}" id="adapter"></chrome-bluetooth>
+      <chrome-bluetooth-socket uuid="[[uuid]]" id="socket"></chrome-bluetooth-socket>
+      <chrome-bluetooth-service uuid="[[uuid]]" id="service" on-created="_onServiceCreated"></chrome-bluetooth-service>
+    </template>
+    <script src="main.js"></script>
+  </body>
+</html>

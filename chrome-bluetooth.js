@@ -95,11 +95,11 @@ Polymer({
      * A map of discovered devices.
      * Keys are dicovered device address and the value is device name.
      */
-    deviceNames: {
-      type: Map,
+    devices: {
+      type: Array,
       readOnly: true,
       notify: true,
-      value: new Map()
+      value: []
     },
     /**
      * State of the Bluetooth adapter.
@@ -114,6 +114,15 @@ Polymer({
       type: Object,
       readOnly: true,
       notify: true
+    },
+    /**
+     * True if the adapter is discoverying devices nearby.
+     */
+    discoverying: {
+      type: Boolean,
+      readOnly: true,
+      notify: true,
+      value: false
     },
     /**
      * A handler to be called when device has been added.
@@ -173,7 +182,7 @@ Polymer({
 
   detached: function() {
     this._removeListeners();
-    this.devices();
+    this.getDevices();
   },
 
   _addListeners: function() {
@@ -197,7 +206,7 @@ Polymer({
    * @return {Promise} Fulfilled promise will return current state.
    */
   detectAdapterState: function() {
-    return new Promise(function(resolve) {
+    return new Promise((resolve) => {
       this._setDetectingState(true);
       chrome.bluetooth.getAdapterState((state) => {
         this._setDetectingState(false);
@@ -230,18 +239,34 @@ Polymer({
    * Updates dicovered devices list.
    */
   _updateDeviceName: function(device) {
-    var names = this.deviceNames;
-    names.set(device.address, device.name);
-    this._setDeviceNames(names);
+    var devices = this.devices;
+    var found = false; 
+    for (let i=0, len = devices.length; i<len; i++) {
+      if (device.address === devices[i].address) {
+        this.splice('devices', i, 1, device);
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      this.push('devices', device);
+    }
+    // devices.push(device);
+    // this._setDevices(devices);
   },
   /**
    * Remove device name from the list of the devices names.
    */
   _removeDeviceName: function(device) {
-    var names = this.deviceNames;
-    if (names.has(device.address)) {
-      names.delete(device.address);
-      this._setDeviceNames(names);
+    var devices = this.devices;
+    //device.address
+    for (let i=0, len = devices.length; i<len; i++) {
+      if (device.address === devices[i].address) {
+        // devices.splice(i, 1);
+        this.splice('devices', i, 1);
+        // this._setDevices(devices);
+        break;
+      }
     }
   },
   
@@ -252,7 +277,7 @@ Polymer({
       return;
     }
 
-    chrome.bluetooth.getDevice(this.device, function(device) {
+    chrome.bluetooth.getDevice(this.device, (device) => {
       if (chrome.runtime.lastError) {
         this.fire('error', {
           'message': chrome.runtime.lastError
@@ -261,22 +286,6 @@ Polymer({
       }
       this._setCurrentDevice(device);
       this.fire('device', device);
-    }.bind(this));
-  },
-
-  /**
-   * Get information about the Bluetooth adapter.
-   *
-   */
-  adapterState: function() {
-    return new Promise(function(resolve, reject) {
-      chrome.bluetooth.getAdapterState(function(adapterInfo) {
-        if (chrome.runtime.lastError) {
-          reject(chrome.runtime.lastError);
-          return;
-        }
-        resolve(adapterInfo);
-      });
     });
   },
 
@@ -290,9 +299,9 @@ Polymer({
    *
    * @return {Promise} Fulfilled promise will result with a list of available devices.
    */
-  devices: function() {
-    return new Promise(function(resolve, reject) {
-      chrome.bluetooth.getDevices(function(deviceInfos) {
+  getDevices: function() {
+    return new Promise((resolve, reject) => {
+      chrome.bluetooth.getDevices((deviceInfos) => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
           return;
@@ -317,8 +326,10 @@ Polymer({
    *
    */
   startDiscovery: function() {
+    this._setDiscoverying(true);
     chrome.bluetooth.startDiscovery(() => {
       if (chrome.runtime.lastError) {
+        this._setDiscoverying(false);
         this.fire('error', {
           'message': chrome.runtime.lastError
         });
@@ -348,6 +359,7 @@ Polymer({
         });
         return;
       }
+      this._setDiscoverying(false);
       this.fire('discovery', {
         'mode': 'ended'
       });
