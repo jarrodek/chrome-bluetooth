@@ -239,8 +239,9 @@ Polymer({
    * Updates dicovered devices list.
    */
   _updateDeviceName: function(device) {
+    //console.log('_updateDeviceName', device);
     var devices = this.devices;
-    var found = false; 
+    var found = false;
     for (let i=0, len = devices.length; i<len; i++) {
       if (device.address === devices[i].address) {
         this.splice('devices', i, 1, device);
@@ -341,9 +342,7 @@ Polymer({
       if (!this.discoveryTimeout) {
         return;
       }
-      window.setTimeout(() => {
-        chrome.bluetooth.stopDiscovery(function() {});
-      }, this.discoveryTimeout);
+      window.setTimeout(() => this.stopDiscovery(), this.discoveryTimeout);
     });
   },
 

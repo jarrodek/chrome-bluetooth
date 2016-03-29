@@ -21,7 +21,8 @@
     "chrome-app-livereload": "bestander/chrome-app-livereload#~0.0.5",
     "test-fixture": "PolymerElements/test-fixture#^1.0.0",
     "paper-radio-group": "PolymerElements/paper-radio-group#^1.0.9",
-    "paper-radio-button": "PolymerElements/paper-radio-button#^1.1.0"
+    "paper-radio-button": "PolymerElements/paper-radio-button#^1.1.0",
+    "paper-item": "PolymerElements/paper-item#*"
   },
   "ignore": [
     "externs/**",
