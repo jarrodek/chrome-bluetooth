@@ -1,5 +1,6 @@
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')();
+var crisper = require('gulp-crisper');
 
 // Lint JavaScript files
 gulp.task('lint', function() {
@@ -17,4 +18,16 @@ gulp.task('lint', function() {
     .pipe($.jscsStylish.combineWithHintResults())
     .pipe($.jshint.reporter('jshint-stylish'))
     .pipe($.jshint.reporter('fail'));
+});
+/**
+ * Make all bower_components CSP ready
+ */
+gulp.task('crisper-bower', function() {
+  gulp.src('bower_components/**/*.html')
+    .pipe(crisper({
+      scriptInHead: false,
+      onlySplit: false,
+      alwaysWriteScript: false
+    }))
+    .pipe(gulp.dest('bower_components/'));
 });

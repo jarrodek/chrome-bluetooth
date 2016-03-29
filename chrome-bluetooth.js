@@ -165,9 +165,9 @@ Polymer({
       value: true,
     },
     /**
-     * A timeout in miliseconds after the Bluetooth will exit discovery mode 
+     * A timeout in miliseconds after the Bluetooth will exit discovery mode
      * after entering into it.
-     * 
+     *
      */
     discoveryTimeout: {
       type: Number,
@@ -202,7 +202,7 @@ Polymer({
    * Detects Bluetooth adapter state.
    * Result will be saved in `adapterState` property.
    * When ready the `state-changed` event will be fired.
-   * 
+   *
    * @return {Promise} Fulfilled promise will return current state.
    */
   detectAdapterState: function() {
@@ -242,7 +242,7 @@ Polymer({
     //console.log('_updateDeviceName', device);
     var devices = this.devices;
     var found = false;
-    for (let i=0, len = devices.length; i<len; i++) {
+    for (let i = 0, len = devices.length; i < len; i++) {
       if (device.address === devices[i].address) {
         this.splice('devices', i, 1, device);
         found = true;
@@ -261,7 +261,7 @@ Polymer({
   _removeDeviceName: function(device) {
     var devices = this.devices;
     //device.address
-    for (let i=0, len = devices.length; i<len; i++) {
+    for (let i = 0, len = devices.length; i < len; i++) {
       if (device.address === devices[i].address) {
         // devices.splice(i, 1);
         this.splice('devices', i, 1);
@@ -270,7 +270,7 @@ Polymer({
       }
     }
   },
-  
+
   deviceChanged: function() {
     this._setCurrentDevice(null);
 
