@@ -4,7 +4,7 @@ demo.isClient = false;
 demo.noRole = true;
 demo.serviceCreated = false;
 demo.addEventListener('dom-change', function() {
-  demo.set('uuid', '1506');
+  demo.set('uuid', chrome.runtime.getManifest().bluetooth.uuids[0]);
 
 });
 demo._openWindow = () => {
@@ -23,8 +23,19 @@ demo._setClient = () => {
 demo._runService = () => {
   demo.$.service.publish();
 };
+demo._closeService = () => {
+  demo.$.service.disconnect();
+};
 demo._onServiceCreated = () => {
   demo.set('serviceCreated', true);
+};
+demo._serviceDiconnected = () => {
+  demo.set('serviceCreated', false);
+};
+demo._onServiceError = (e) => {
+  if (e.detail.message) {
+    console.log(e.detail.message);
+  }
 };
 demo._searchBluetoothDevices = () => {
   demo.$.adapter.startDiscovery();
@@ -37,7 +48,7 @@ demo._getDeviceName = (device) => device.name || device.address;
  * @param {Array<String>} uuids A list of service uuids (external device services)
  */
 demo._computeDeviceSupported = (uuids) => {
-  console.log('_computeDeviceSupported',(uuids && uuids.indexOf(demo.uuid) !== -1));
+  // console.log('_computeDeviceSupported',(uuids && uuids.indexOf(demo.uuid) !== -1));
   return (uuids && uuids.indexOf(demo.uuid) !== -1);
 };
 /**

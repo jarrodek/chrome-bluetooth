@@ -7,7 +7,7 @@
   "permissions": [
   ],
   "bluetooth": { 
-    "uuids": ["1506"],
+    "uuids": ["9161c3ec-fc83-415e-84c9-c58f2c5c5b2d"],
     "socket": true
   },
   "app": {

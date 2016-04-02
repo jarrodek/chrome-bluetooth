@@ -33,7 +33,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
   </style>
   </head>
-
   <body>
     <template is="dom-bind">
       <div class="vertical-section vertical-section-container centered">
@@ -47,6 +46,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </template>
             <template is="dom-if" if="[[serviceCreated]]">
               <p>Service is up and running. Now on second app window run a client.</p>
+              <paper-button raised on-tap="_closeService">Close service</paper-button>
             </template>
           </template>
           <div hidden$="[[!isClient]]">
@@ -74,8 +74,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-button raised on-tap="_openWindow">Open another window</paper-button>
       </div>
       <chrome-bluetooth devices="{{devicesAvailable}}" discoverying="{{searchingDevices}}" adapter-state="{{adapterState}}" id="adapter"></chrome-bluetooth>
-      <chrome-bluetooth-socket uuid="[[uuid]]" id="socket" on-connected="_onClientSocketConnected" on-error="_onClientSocketError" on-message="_onClientMessageReceived"></chrome-bluetooth-socket>
-      <chrome-bluetooth-service uuid="[[uuid]]" id="service" on-created="_onServiceCreated"></chrome-bluetooth-service>
+      <chrome-bluetooth-socket
+        uuid="[[uuid]]"
+        id="socket"
+        on-connected="_onClientSocketConnected"
+        on-error="_onClientSocketError"
+        on-message="_onClientMessageReceived"></chrome-bluetooth-socket>
+      <chrome-bluetooth-service
+        uuid="[[uuid]]"
+        id="service"
+        type="l2cap"
+        on-created="_onServiceCreated"
+        on-disconnected="_serviceDiconnected"
+        on-error="_onServiceError"></chrome-bluetooth-service>
     </template>
     <script src="main.js"></script>
   </body>

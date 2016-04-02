@@ -6,12 +6,12 @@ Polymer({
   /**
    * Fired when the connection has been made and the socket is ready to send
    * and receive data.
-   *
+   * 
    * @event connected
    */
   /**
    * Fired when the message has been sent to a socket.
-   *
+   * 
    * @event sent
    * @param {Number} bytesSent Number of bytes sent by a socket.
    */
@@ -41,7 +41,7 @@ Polymer({
     }
     chrome.bluetoothSocket.create((createInfo) => {
       this._setSocketId(createInfo.socketId);
-      chrome.bluetoothSocket.connect(createInfo.socketId, this.address, this.uuid, function() {
+      chrome.bluetoothSocket.connect(createInfo.socketId, this.address, this.uuid, () => {
         if (chrome.runtime.lastError) {
           this.fire('error', chrome.runtime.lastError);
           chrome.bluetoothSocket.close(this.socketId, () => {
@@ -50,13 +50,13 @@ Polymer({
           return;
         }
         this.fire('connected');
-      }.bind(this));
+      });
     });
   },
-
+  
   /**
    * Sends a message to a socket.
-   *
+   * 
    * @param {ArrayBuffer} buffer A message to send.
    */
   send: function(buffer) {
@@ -73,11 +73,12 @@ Polymer({
       });
     });
   },
-
+  
   _isAllowedSocket: (socketId) => {
     if (socketId !== this.socketId) {
       return false;
     }
     return true;
-  }
+  },
+  
 });
